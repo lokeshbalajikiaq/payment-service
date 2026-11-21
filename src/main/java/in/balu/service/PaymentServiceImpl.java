@@ -8,6 +8,7 @@ import in.balu.models.Payment;
 import in.balu.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,17 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private UserFeignClient userFeignClient;
+
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserIntegrationService userIntegrationService;
 
     @Override
     public PaymentResponseDTO processPayment(PaymentRequestDTO request) {
 
-        UserDTO userDTO = userFeignClient.fetchUser(request.getUserId().intValue());
-
-        if(userDTO == null) {
-            throw new RuntimeException("User not Found in DB");
-        }
+        UserDTO userDTO = userIntegrationService.fetchUser(request);    // will Trigger CircuitBreaker
 
         Payment payment = new Payment();
 
